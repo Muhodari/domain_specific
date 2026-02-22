@@ -5,203 +5,154 @@ pipeline_tag: text-generation
 tags:
 - base_model:adapter:TinyLlama/TinyLlama-1.1B-Chat-v1.0
 - lora
+- medical
+- qa
+- instruction-tuning
 - transformers
 ---
 
-# Model Card for Model ID
+# Medical Education Assistant (LoRA Adapter)
 
-<!-- Provide a quick summary of what the model is/does. -->
+This is a **PEFT (LoRA) adapter** for [TinyLlama/TinyLlama-1.1B-Chat-v1.0](https://huggingface.co/TinyLlama/TinyLlama-1.1B-Chat-v1.0). It is not a standalone model: you load the base TinyLlama model and then apply this adapter on top. The result is a small, domain-specific model that answers **medical education questions** in a concise, flashcard-style format.
 
+---
 
+## What this adapter does
 
-## Model Details
+- **Base model:** TinyLlama 1.1B Chat — a 1.1B-parameter, chat-oriented LLaMA model.
+- **Adapter:** LoRA (Low-Rank Adaptation) trained on medical Q&A data. Only the adapter weights are stored here (~1.1M trainable parameters, ~0.1% of the full model).
+- **Purpose:** The base model is general-purpose. After applying this adapter, the model is better at answering **medical and health-related questions** with clearer terminology and more consistent, educational-style answers.
 
-### Model Description
+---
 
-<!-- Provide a longer summary of what this model is. -->
+## Model details
 
+| Field | Value |
+|-------|--------|
+| **Base model** | `TinyLlama/TinyLlama-1.1B-Chat-v1.0` |
+| **Adapter type** | LoRA (PEFT) |
+| **Target modules** | `q_proj`, `v_proj` (attention layers) |
+| **LoRA rank (r)** | 8 |
+| **LoRA alpha** | 16 |
+| **LoRA dropout** | 0.05 |
+| **Task** | Causal language modeling (instruction-style Q&A) |
+| **Library** | PEFT (e.g. 0.18.x) |
 
+---
 
-- **Developed by:** [More Information Needed]
-- **Funded by [optional]:** [More Information Needed]
-- **Shared by [optional]:** [More Information Needed]
-- **Model type:** [More Information Needed]
-- **Language(s) (NLP):** [More Information Needed]
-- **License:** [More Information Needed]
-- **Finetuned from model [optional]:** [More Information Needed]
+## How to use this adapter
 
-### Model Sources [optional]
+You must **load the base model first**, then load this adapter. The adapter does not work by itself.
 
-<!-- Provide the basic links for the model. -->
+### 1. Install dependencies
 
-- **Repository:** [More Information Needed]
-- **Paper [optional]:** [More Information Needed]
-- **Demo [optional]:** [More Information Needed]
+```bash
+pip install transformers peft torch
+```
 
-## Uses
+### 2. Load base model + adapter
 
-<!-- Address questions around how the model is intended to be used, including the foreseeable users of the model and those affected by the model. -->
+```python
+from transformers import AutoTokenizer, AutoModelForCausalLM
+from peft import PeftModel
+import torch
 
-### Direct Use
+base_model_name = "TinyLlama/TinyLlama-1.1B-Chat-v1.0"
+adapter_path = "./medical-assistant-lora"  # or path where you saved this folder
 
-<!-- This section is for the model use without fine-tuning or plugging into a larger ecosystem/app. -->
+tokenizer = AutoTokenizer.from_pretrained(adapter_path)  # tokenizer saved with adapter
+model = AutoModelForCausalLM.from_pretrained(
+    base_model_name,
+    device_map="auto",
+    torch_dtype=torch.float16,  # or torch.float32 on CPU
+)
+model = PeftModel.from_pretrained(model, adapter_path)
+model.eval()
+```
 
-[More Information Needed]
+### 3. Run inference
 
-### Downstream Use [optional]
+Use the same chat format as the base TinyLlama model (e.g. `<start_of_turn>user` / `<start_of_turn>model`), or a simple “Question: … Answer:” prompt as in the training data. Example:
 
-<!-- This section is for the model use when fine-tuned for a task, or when plugged into a larger ecosystem/app -->
+```python
+question = "What is the difference between type 1 and type 2 diabetes?"
+prompt = f"<start_of_turn>user\n{question}\n<end_of_turn>\n<start_of_turn>model\n"
 
-[More Information Needed]
+inputs = tokenizer(prompt, return_tensors="pt").to(model.device)
+with torch.no_grad():
+    outputs = model.generate(
+        **inputs,
+        max_new_tokens=256,
+        do_sample=True,
+        top_p=0.9,
+        temperature=0.7,
+    )
 
-### Out-of-Scope Use
+response = tokenizer.decode(outputs[0], skip_special_tokens=True)
+# Then strip the prompt and keep only the model’s answer.
+```
 
-<!-- This section addresses misuse, malicious use, and uses that the model will not work well for. -->
+For a full pipeline (data load, training, and Gradio chat), see the main repository: the **medical_assistant.ipynb** notebook in the parent `domain_assistant` project.
 
-[More Information Needed]
+---
 
-## Bias, Risks, and Limitations
+## Training data
 
-<!-- This section is meant to convey both technical and sociotechnical limitations. -->
+- **Dataset:** Medical Meadow Medical Flashcards (e.g. from `medalpaca/medical_meadow_medical_flashcards` or a local copy). Curated medical question–answer pairs in instruction format.
+- **Preprocessing:** Empty Q/A removed; examples mapped to an instruction–response format and tokenized with a fixed max length (e.g. 256). Train/eval split; training often uses a subset (e.g. 2k train / 400 eval) for speed.
+- **Data schema:** Each example has a question (`input`) and answer (`output`), formatted for causal language modeling.
 
-[More Information Needed]
+---
 
-### Recommendations
+## Training procedure
 
-<!-- This section is meant to convey recommendations with respect to the bias, risk, and technical limitations. -->
+- **Method:** LoRA on the base model; only `q_proj` and `v_proj` in the attention layers are adapted.
+- **Hyperparameters (typical run):** 1 epoch, batch size 4, gradient accumulation 2 (effective batch 8), learning rate 5e-5, cosine LR schedule, warmup ratio 0.03. Eval at end of epoch; no heavy seq2seq metrics during training to save memory.
+- **Hardware:** Can be run on a single GPU (e.g. Colab T4) or CPU (slower). Training time depends on hardware and dataset size (e.g. ~1 hour on GPU for 2k examples).
 
-Users (both direct and downstream) should be made aware of the risks, biases and limitations of the model. More information needed for further recommendations.
-
-## How to Get Started with the Model
-
-Use the code below to get started with the model.
-
-[More Information Needed]
-
-## Training Details
-
-### Training Data
-
-<!-- This should link to a Dataset Card, perhaps with a short stub of information on what the training data is all about as well as documentation related to data pre-processing or additional filtering. -->
-
-[More Information Needed]
-
-### Training Procedure
-
-<!-- This relates heavily to the Technical Specifications. Content here should link to that section when it is relevant to the training procedure. -->
-
-#### Preprocessing [optional]
-
-[More Information Needed]
-
-
-#### Training Hyperparameters
-
-- **Training regime:** [More Information Needed] <!--fp32, fp16 mixed precision, bf16 mixed precision, bf16 non-mixed precision, fp16 non-mixed precision, fp8 mixed precision -->
-
-#### Speeds, Sizes, Times [optional]
-
-<!-- This section provides information about throughput, start/end time, checkpoint size if relevant, etc. -->
-
-[More Information Needed]
+---
 
 ## Evaluation
 
-<!-- This section describes the evaluation protocols and provides the results. -->
+- **Metrics:** Training and validation loss are logged; perplexity is computed as `exp(eval_loss)` and printed in the notebook.
+- **Qualitative:** The notebook compares base vs fine-tuned model on the same medical and out-of-domain questions. The fine-tuned model typically gives more focused, medically accurate answers and aligns better with the flashcard style.
 
-### Testing Data, Factors & Metrics
+See the main **README.md** in the `domain_assistant` repository for comparison examples and performance notes.
 
-#### Testing Data
+---
 
-<!-- This should link to a Dataset Card if possible. -->
+## Intended use
 
-[More Information Needed]
+- **In scope:** Medical and health education Q&A, study aids, concise explanations of medical concepts (e.g. definitions, differences between conditions, side effects, when to seek care). Best used in combination with a UI (e.g. Gradio) that restricts queries to medical topics.
+- **Out of scope:** Clinical decision-making, diagnosis, treatment advice, legal or regulatory use, or any use as a substitute for a qualified healthcare professional. The model can still generate text on non-medical topics if prompted directly; the project’s Gradio app uses a simple filter to return an “out-of-scope” message for non-medical questions.
 
-#### Factors
+---
 
-<!-- These are the things the evaluation is disaggregating by, e.g., subpopulations or domains. -->
+## Limitations and risks
 
-[More Information Needed]
+- **Size and knowledge:** TinyLlama is a small model; knowledge and reasoning are limited. Do not rely on it for factual clinical decisions.
+- **Bias and errors:** Training data and base model can contain biases and mistakes. Outputs can be wrong or misleading.
+- **No medical authority:** This is an educational demo only. Always consult a qualified healthcare provider for medical advice.
+- **Out-of-domain behaviour:** Without a guardrail (e.g. the Gradio scope check), the model may answer non-medical questions; quality on those can be worse than the base model because of domain-focused training.
 
-#### Metrics
+---
 
-<!-- These are the evaluation metrics being used, ideally with a description of why. -->
+## Files in this directory
 
-[More Information Needed]
+- **adapter_config.json** — LoRA configuration (base model path, target modules, r, alpha, dropout, task type).
+- **adapter_model.safetensors** — LoRA weights (only these are fine-tuned; base weights are loaded from Hugging Face).
+- **tokenizer_config.json**, **special_tokens_map.json**, etc. — Tokenizer files (same as base model), saved for convenience so you can load from this folder.
 
-### Results
+---
 
-[More Information Needed]
+## Citation and license
 
-#### Summary
+- **Base model:** See [TinyLlama](https://huggingface.co/TinyLlama/TinyLlama-1.1B-Chat-v1.0) for its license and citation.
+- **Dataset:** See the Medical Meadow / MedAlpaca dataset documentation for data license and attribution.
+- **This adapter:** Intended for educational and research use. Use responsibly and do not rely on it for medical decisions.
 
+---
 
-
-## Model Examination [optional]
-
-<!-- Relevant interpretability work for the model goes here -->
-
-[More Information Needed]
-
-## Environmental Impact
-
-<!-- Total emissions (in grams of CO2eq) and additional considerations, such as electricity usage, go here. Edit the suggested text below accordingly -->
-
-Carbon emissions can be estimated using the [Machine Learning Impact calculator](https://mlco2.github.io/impact#compute) presented in [Lacoste et al. (2019)](https://arxiv.org/abs/1910.09700).
-
-- **Hardware Type:** [More Information Needed]
-- **Hours used:** [More Information Needed]
-- **Cloud Provider:** [More Information Needed]
-- **Compute Region:** [More Information Needed]
-- **Carbon Emitted:** [More Information Needed]
-
-## Technical Specifications [optional]
-
-### Model Architecture and Objective
-
-[More Information Needed]
-
-### Compute Infrastructure
-
-[More Information Needed]
-
-#### Hardware
-
-[More Information Needed]
-
-#### Software
-
-[More Information Needed]
-
-## Citation [optional]
-
-<!-- If there is a paper or blog post introducing the model, the APA and Bibtex information for that should go in this section. -->
-
-**BibTeX:**
-
-[More Information Needed]
-
-**APA:**
-
-[More Information Needed]
-
-## Glossary [optional]
-
-<!-- If relevant, include terms and calculations in this section that can help readers understand the model or model card. -->
-
-[More Information Needed]
-
-## More Information [optional]
-
-[More Information Needed]
-
-## Model Card Authors [optional]
-
-[More Information Needed]
-
-## Model Card Contact
-
-[More Information Needed]
 ### Framework versions
 
-- PEFT 0.18.1
+- PEFT 0.18.1 (or compatible)

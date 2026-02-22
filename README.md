@@ -1,6 +1,16 @@
 # Medical Education Assistant — LLM Fine-Tuning with PEFT
 
+**[Demo video (5–10 min)](https://youtu.be/TkjNu_Ve470)** — Fine-tuning process, model functionality, base vs fine-tuned comparison, and Gradio chat demo.
+
+[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/13t_1dQYuhb9QBFUrNwZ1I32Ba0-p12wL?usp=sharing) — [**Open notebook in Google Colab**](https://colab.research.google.com/drive/13t_1dQYuhb9QBFUrNwZ1I32Ba0-p12wL?usp=sharing) (no clone required).
+
+---
+
 A well-documented repository for turning a general-purpose LLM into a **medical question–answering assistant** using **parameter-efficient fine-tuning (PEFT)** with LoRA. The project includes a single Jupyter Notebook that runs **end-to-end on Google Colab** with minimal setup: data preprocessing, model training, evaluation, and an interactive Gradio demo.
+
+### Note on development environment
+
+During development we encountered **difficulties with Google Colab** (e.g. session limits, GPU availability, or runtime disconnects during long training runs). The pipeline was therefore **run and validated using local configuration**: the notebook was executed on a local machine (CPU or local GPU) with the data in the `data/` folder and the same dependency stack. The notebook is written to work in both environments: it detects the absence of CUDA and uses CPU when needed (e.g. on Mac without GPU), and uses `DATA_DIR = "data"` for local runs. You can use either **Colab** (link above) for a quick try or **local setup** (clone the repo, install dependencies, place data in `data/`, run the notebook) if you prefer stability or longer runs.
 
 ---
 
@@ -71,11 +81,13 @@ Ensure the repository (including `data/` and the notebook) is available. For Col
 - **Option A (local)**: Place the medical flashcards dataset in `data/medical_flashcards_hf` (e.g. by downloading from Hugging Face and saving with `save_to_disk`).
 - **Option B**: Use the notebook’s data cell; it expects `DATA_DIR = "data"` and loads from `data/medical_flashcards_hf`.
 
-### 3. Run the notebook on Google Colab (recommended)
+### 3. Run the notebook
 
-1. Open **Google Colab** and upload or clone the repo.
-2. Set runtime to **GPU** (Runtime → Change runtime type → T4 or similar) for faster training.
-3. Run cells **in order**:
+**Option A — Google Colab:** Open the [Colab link](https://colab.research.google.com/drive/13t_1dQYuhb9QBFUrNwZ1I32Ba0-p12wL?usp=sharing), set runtime to **GPU** (Runtime → Change runtime type → T4 or similar), and run cells in order. You may need to upload the dataset to Colab or mount Drive if your data lives there.
+
+**Option B — Local configuration:** Because we faced difficulties with Colab (session limits, disconnects, GPU availability), the project was developed and tested locally. To run locally: clone the repo, create a virtual environment, install the dependencies below, place the dataset in `data/medical_flashcards_hf`, and run the notebook (e.g. Jupyter or VS Code). The notebook will use `DATA_DIR = "data"` and fall back to CPU if no CUDA is available (e.g. on Mac). Training on CPU is slower but avoids Colab-related issues.
+
+**Run cells in order:**
    - **Setup**: Install dependencies (`transformers`, `datasets`, `peft`, `evaluate`, `gradio`, etc.).
    - **Imports and device**: Load tokenizer and base model.
    - **Data**: Set `DATA_DIR`, load dataset, preprocess, tokenize, (optional) subsample.
