@@ -1,0 +1,77 @@
+{
+  "best_global_step": 250,
+  "best_metric": 0.9049233198165894,
+  "best_model_checkpoint": "medical-assistant-lora/checkpoint-250",
+  "epoch": 1.0,
+  "eval_steps": 500,
+  "global_step": 250,
+  "is_hyper_param_search": false,
+  "is_local_process_zero": true,
+  "is_world_process_zero": true,
+  "log_history": [
+    {
+      "epoch": 0.2,
+      "grad_norm": 0.9360018968582153,
+      "learning_rate": 4.654164405992435e-05,
+      "loss": 1.521622772216797,
+      "step": 50
+    },
+    {
+      "epoch": 0.4,
+      "grad_norm": 0.3642241358757019,
+      "learning_rate": 3.449207550564285e-05,
+      "loss": 1.007812728881836,
+      "step": 100
+    },
+    {
+      "epoch": 0.6,
+      "grad_norm": 0.4446132183074951,
+      "learning_rate": 1.8581786660668434e-05,
+      "loss": 0.9023322296142579,
+      "step": 150
+    },
+    {
+      "epoch": 0.8,
+      "grad_norm": 0.4948499798774719,
+      "learning_rate": 5.2819834207045e-06,
+      "loss": 0.9017459869384765,
+      "step": 200
+    },
+    {
+      "epoch": 1.0,
+      "grad_norm": 0.40965935587882996,
+      "learning_rate": 2.1065556045779534e-09,
+      "loss": 0.8896154022216797,
+      "step": 250
+    },
+    {
+      "epoch": 1.0,
+      "eval_loss": 0.9049233198165894,
+      "eval_runtime": 46.8066,
+      "eval_samples_per_second": 2.136,
+      "eval_steps_per_second": 0.534,
+      "step": 250
+    }
+  ],
+  "logging_steps": 50,
+  "max_steps": 250,
+  "num_input_tokens_seen": 0,
+  "num_train_epochs": 1,
+  "save_steps": 500,
+  "stateful_callbacks": {
+    "TrainerControl": {
+      "args": {
+        "should_epoch_stop": false,
+        "should_evaluate": false,
+        "should_log": false,
+        "should_save": true,
+        "should_training_stop": true
+      },
+      "attributes": {}
+    }
+  },
+  "total_flos": 3181482344448000.0,
+  "train_batch_size": 4,
+  "trial_name": null,
+  "trial_params": null
+}
