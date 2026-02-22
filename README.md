@@ -97,25 +97,67 @@ If you already have a saved adapter (e.g. `medical-assistant-lora/`):
 
 ## Example Conversations: Impact of Fine-Tuning
 
-These illustrate how fine-tuning changes behaviour on medical vs general questions.
+Below are **side-by-side comparisons** of the base TinyLlama model and the fine-tuned medical assistant on the same prompts (from the notebook’s comparison cells).
 
-### Medical question: Type 1 vs Type 2 diabetes
+---
 
-**Base model**: Often gives a reasonable but generic explanation; may be less aligned with the concise, educational style of the flashcard data.
+### Comparison 1: Type 1 vs Type 2 diabetes
 
-**Fine-tuned model**: Tends to give more **focused, concise** answers with clearer medical terminology (e.g. “insulin resistance”, “autoimmune”, “metabolic disorder”) and structure that matches the training distribution.
+**Question:** *Explain the difference between type 1 and type 2 diabetes in simple terms.*
 
-### Medical question: Side effects of antibiotics
+| Base model | Fine-tuned model |
+|------------|------------------|
+| Type 1 diabetes is a chronic disease that occurs when the pancreas stops producing insulin, a hormone that helps the body use glucose (sugar) as a source of energy. Type 2 diabetes is a condition in which the body becomes resistant to the effects of insulin, which is produced by the pancreas. Type 1 diabetes is often inherited, meaning that a person has a family history of the disease. It is more common in young adults and can lead to serious complications, such as blindness and kidney failure. Type 2 diabetes is more common in adults and can be caused by a variety of factors, including obesity, smoking, and a lack of exercise. Both types of diabetes can be treated with medication and lifestyle changes, such as diet and exercise. | Type 1 diabetes is a chronic disease where the body does not produce insulin, while type 2 diabetes is a metabolic disorder characterized by insulin resistance. Type 1 diabetes is often caused by autoimmune disease, such as juvenile-onset diabetes, while type 2 diabetes is typically due to lifestyle factors, such as obesity, sedentary lifestyle, and a poor diet. |
 
-**Base model**: May repeat the question or produce short, incomplete answers (e.g. “Common side effects include:” without finishing).
+**Insight:** Fine-tuned answer is more concise and uses clearer medical terms (*insulin resistance*, *metabolic disorder*, *autoimmune*) in a flashcard-style format.
 
-**Fine-tuned model**: More likely to complete the answer with concrete side effects (e.g. GI upset, allergic reactions, resistance) in a consistent, educational style.
+---
 
-### Out-of-domain: “What is the capital of France?” / “Write a haiku about the ocean”
+### Comparison 2: Side effects of antibiotics
 
-**Base model**: May answer normally (general knowledge).
+**Question:** *What are common side effects of antibiotics that patients should know about?*
 
-**Fine-tuned model**: When used through the **Gradio app**, non-medical questions are detected via `medical_vocab` overlap; the app returns a fixed **out-of-scope message** instead of generating, so the assistant stays on-topic and the impact of fine-tuning is clear: the model is specialized for medical Q&A and the UI enforces scope.
+| Base model | Fine-tuned model |
+|------------|------------------|
+| Often repeats the question or stops after “Common side effects of antibiotics that patients should know about include:” without listing them, or drifts into other topics. | Completes the answer with concrete content, e.g. drug interactions, and advises patients to inform their healthcare provider about medications or foods before taking antibiotics. |
+
+**Insight:** Base model tends to give incomplete or repetitive answers; fine-tuned model gives a complete, educational response.
+
+---
+
+### Comparison 3: Chest pain — when to seek urgent care
+
+**Question:** *When should someone seek urgent medical attention for chest pain?*
+
+| Base model | Fine-tuned model |
+|------------|------------------|
+| Describes chest pain as a symptom and stresses seeking care soon and avoiding delay, with general wording about “best possible outcome” and “complications or death.” | Gives more actionable guidance: severe or persistent pain, pain that does not improve within 24 hours, and explicitly recommends calling 911 or the local emergency number and informing the healthcare provider about history of chest pain. |
+
+**Insight:** Fine-tuned model aligns better with clinical guidance (e.g. when to call 911, persistence/worsening) in a clear, actionable way.
+
+---
+
+### Comparison 4: Out-of-domain — general knowledge
+
+**Question:** *What is the capital of France?*
+
+| Base model | Fine-tuned model |
+|------------|------------------|
+| Answers correctly: “The capital of France is Paris.” (general knowledge unchanged). | May still answer when called directly in the notebook; in the **Gradio app**, this question is detected as non-medical and the user receives the fixed **out-of-scope message** instead of an answer. |
+
+**Insight:** In the chat UI, the fine-tuned assistant is restricted to medical Q&A; non-medical questions get a single, consistent out-of-scope message.
+
+---
+
+### Comparison 5: Out-of-domain — creative writing
+
+**Question:** *Write a short haiku about the ocean.*
+
+| Base model | Fine-tuned model |
+|------------|------------------|
+| Produces creative, multi-line text (e.g. verses about the ocean, waves, mystery, solace). | Produces repetitive, non-haiku prose (“The ocean is a vast and vast sea… a force that is both majestic and terrifying…”). In **Gradio**, this is treated as out-of-scope and the user sees the out-of-scope message. |
+
+**Insight:** Fine-tuning shifts the model toward medical content; on non-medical prompts it may degrade or, in the app, be blocked so the assistant stays on-topic.
 
 ---
 
