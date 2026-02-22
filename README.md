@@ -1,9 +1,14 @@
 # Medical Education Assistant — LLM Fine-Tuning with PEFT
 
+### Demo video
+
 **[Demo video (5–10 min)](https://youtu.be/TkjNu_Ve470)** — Fine-tuning process, model functionality, base vs fine-tuned comparison, and Gradio chat demo.
+
+### Run in Google Colab
 
 [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/13t_1dQYuhb9QBFUrNwZ1I32Ba0-p12wL?usp=sharing) — [**Open notebook in Google Colab**](https://colab.research.google.com/drive/13t_1dQYuhb9QBFUrNwZ1I32Ba0-p12wL?usp=sharing) (no clone required).
 
+---
 
 ### Note on development environment
 
