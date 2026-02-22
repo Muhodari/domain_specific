@@ -4,9 +4,6 @@
 
 [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/13t_1dQYuhb9QBFUrNwZ1I32Ba0-p12wL?usp=sharing) — [**Open notebook in Google Colab**](https://colab.research.google.com/drive/13t_1dQYuhb9QBFUrNwZ1I32Ba0-p12wL?usp=sharing) (no clone required).
 
----
-
-A well-documented repository for turning a general-purpose LLM into a **medical question–answering assistant** using **parameter-efficient fine-tuning (PEFT)** with LoRA. The project includes a single Jupyter Notebook that runs **end-to-end on Google Colab** with minimal setup: data preprocessing, model training, evaluation, and an interactive Gradio demo.
 
 ### Note on development environment
 
@@ -21,7 +18,7 @@ During development we encountered **difficulties with Google Colab** (e.g. sessi
 - [Performance Metrics](#performance-metrics)
 - [Steps to Run the Model](#steps-to-run-the-model)
 - [Example Conversations: Impact of Fine-Tuning](#example-conversations-impact-of-fine-tuning)
-- [Repository Structure](#repository-structure)
+- [Project Structure](#project-structure)
 - [Requirements](#requirements)
 
 ---
@@ -74,7 +71,7 @@ Only a small fraction of parameters (~0.1%) is trained, making the pipeline effi
 
 ### 1. Clone or upload the repo
 
-Ensure the repository (including `data/` and the notebook) is available. For Colab, you can clone the repo or upload the folder and set the runtime to use the notebook.
+Ensure the project (including `data/` and the notebook) is available. For Colab, you can clone the repo or upload the folder and set the runtime to use the notebook.
 
 ### 2. Prepare data
 
@@ -173,7 +170,7 @@ Below are **side-by-side comparisons** of the base TinyLlama model and the fine-
 
 ---
 
-## Repository Structure
+## Project Structure
 
 ```
 domain_assistant/
@@ -206,9 +203,3 @@ pip install transformers datasets accelerate peft evaluate rouge-score sacrebleu
 ```
 
 For Google Colab, the notebook includes a cell that installs these with `!pip install -q ...`.
-
----
-
-## License and Disclaimer
-
-The base model (TinyLlama) and the medical dataset have their own licenses; see their respective pages. This project is for **educational and research use**. The assistant is not a substitute for professional medical advice; always consult a healthcare provider for medical decisions.
